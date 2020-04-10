@@ -1,0 +1,5 @@
+flask
+flask_graphql
+flask_mongoengine
+bcrypt
+graphene_mongo
