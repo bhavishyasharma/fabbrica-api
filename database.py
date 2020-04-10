@@ -19,7 +19,7 @@ def init_db():
         UserModel.objects(username="administrator").get()
     except DoesNotExist:
         adminUser = UserModel(firstname="Bhavishya", lastname="Sharma",
-            username="administrator", email="admin@futech.co.in",
-            roles = [admin._id, user._id])
+            username="administrator", email="admin@futech.co.in")
         adminUser.setPassword("Bbs199509")
         adminUser.save()
+        UserModel.objects(id=adminUser.id).update_one(push__roles=admin)

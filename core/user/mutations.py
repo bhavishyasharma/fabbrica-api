@@ -1,8 +1,15 @@
 import graphene
-from .type import UserType, UserInput
+from graphql import GraphQLError
+from mongoengine.errors import DoesNotExist
+from flask_jwt_extended import (
+    JWTManager, jwt_required, create_access_token,
+    jwt_refresh_token_required, create_refresh_token,
+    get_jwt_identity
+)
+from .type import UserType, UserInput, LoginInput, TokenOutput
 from .model import UserModel
 from ..role.model import RoleModel
-
+from role_decorators import admin_required
 
 class RegisterUserMutation(graphene.Mutation):
     user = graphene.Field(UserType)
@@ -17,11 +24,31 @@ class RegisterUserMutation(graphene.Mutation):
             lastname = user_data.lastname,
             username = user_data.username,
             email = user_data.email,
-            roles = [userRole._id]
+            roles = [userRole]
         )
         user.setPassword(user_data.password)
         user.save()
         return RegisterUserMutation(user=user)
+
+class LoginMutation(graphene.Mutation):
+    token = graphene.Field(TokenOutput)
+
+    class Arguments:
+        login_data = LoginInput(required=True)
+
+    def mutate(self, info, login_data=None):
+        
+            user = UserModel.objects(username=login_data.username).get()
+            if(user.verifyPassword(login_data.password)):
+                token = TokenOutput(
+                    user = user,
+                    access_token = create_access_token(identity=user),
+                    refresh_token = create_refresh_token(identity=user)
+                )
+                return LoginMutation(token=token)
+            else:
+                raise GraphQLError('Invalid username or password1')
+        
 
 class AddUserRoleMutation(graphene.Mutation):
     user = graphene.Field(UserType)
@@ -29,6 +56,8 @@ class AddUserRoleMutation(graphene.Mutation):
         username = graphene.String(required=True)
         role = graphene.String(required=True)
 
+    @jwt_required
+    @admin_required
     def mutate(self, info, username, role):
         user = UserModel.objects(username=username).get()
         _role = RoleModel.objects(name=role).get()

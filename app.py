@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_graphql import GraphQLView
 from flask_mongoengine import MongoEngine
+from flask_jwt_extended import JWTManager
 
 from database import init_db
 
@@ -9,6 +10,14 @@ app.config['MONGODB_SETTINGS'] = {
     'db': 'catalyst',
     
 }
+app.config['JWT_SECRET_KEY'] = 'super-secret'
+jwt = JWTManager(app)
+@jwt.user_claims_loader
+def add_claims_to_access_token(user):
+    roles = []
+    for role in user.roles:
+        roles.append(role.name)
+    return {"roles": roles}
 app.debug = True
 db = MongoEngine()
 

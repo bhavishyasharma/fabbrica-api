@@ -3,6 +3,6 @@ from mongoengine.fields import StringField, ObjectIdField
 
 class RoleModel(Document):
     meta = {'collection': 'role'}
-    _id = ObjectIdField()
+    Id = StringField()
     name = StringField(unique=True)
     label = StringField()
