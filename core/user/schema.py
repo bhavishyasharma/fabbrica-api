@@ -1,8 +1,13 @@
 import graphene
+from mongoengine.errors import DoesNotExist
 from graphene_mongo import MongoengineConnectionField, MongoengineObjectType
-from flask_jwt_extended import current_user, jwt_required
+from flask_jwt_extended import (
+    JWTManager, jwt_required, create_access_token,
+    jwt_refresh_token_required, create_refresh_token,
+    get_jwt_identity
+)
 from role_decorators import admin_required
-from .type import UserType
+from .type import UserType, LoginInput, TokenOutput
 from .model import UserModel
 from .mutations import RegisterUserMutation, AddUserRoleMutation, LoginMutation
 from ..role.model import RoleModel
@@ -13,6 +18,22 @@ class Query(graphene.ObjectType):
     users = graphene.List(UserType, filters=graphene.List(Filter, required=False), 
         pagination=Pagination(required=False), sortings = graphene.List(graphene.String, required=False))
     users_count = graphene.Int(filters=graphene.List(Filter, required=False))
+    login = graphene.Field(TokenOutput, login_data = LoginInput(required=True))
+
+    def resolve_login(self, info, login_data=None):
+        try:
+            user = UserModel.objects(username=login_data.username).get()
+            if(user.verifyPassword(login_data.password)):
+                token = TokenOutput(
+                    user = user,
+                    access_token = create_access_token(identity=user),
+                    refresh_token = create_refresh_token(identity=user)
+                )
+                return token
+            else:
+                raise GraphQLError('Invalid username or password')
+        except DoesNotExist:
+            raise GraphQLError('Invalid username or password')
 
     @jwt_required
     @admin_required
@@ -47,6 +68,5 @@ class Query(graphene.ObjectType):
 class Mutation(graphene.ObjectType):
     register_user = RegisterUserMutation.Field()
     add_user_role = AddUserRoleMutation.Field()
-    login = LoginMutation.Field()
  
 schema = graphene.Schema(query=Query, types=[UserType], mutation=Mutation)

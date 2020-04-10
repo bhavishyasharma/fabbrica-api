@@ -30,26 +30,6 @@ class RegisterUserMutation(graphene.Mutation):
         user.save()
         return RegisterUserMutation(user=user)
 
-class LoginMutation(graphene.Mutation):
-    token = graphene.Field(TokenOutput)
-
-    class Arguments:
-        login_data = LoginInput(required=True)
-
-    def mutate(self, info, login_data=None):
-        
-            user = UserModel.objects(username=login_data.username).get()
-            if(user.verifyPassword(login_data.password)):
-                token = TokenOutput(
-                    user = user,
-                    access_token = create_access_token(identity=user),
-                    refresh_token = create_refresh_token(identity=user)
-                )
-                return LoginMutation(token=token)
-            else:
-                raise GraphQLError('Invalid username or password1')
-        
-
 class AddUserRoleMutation(graphene.Mutation):
     user = graphene.Field(UserType)
     class Arguments:
