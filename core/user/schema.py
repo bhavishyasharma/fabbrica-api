@@ -1,4 +1,5 @@
 import graphene
+from graphql import GraphQLError
 from mongoengine.errors import DoesNotExist
 from graphene_mongo import MongoengineConnectionField, MongoengineObjectType
 from flask_jwt_extended import (
@@ -9,7 +10,7 @@ from flask_jwt_extended import (
 from role_decorators import admin_required
 from .type import UserType, LoginInput, TokenOutput
 from .model import UserModel
-from .mutations import RegisterUserMutation, AddUserRoleMutation, LoginMutation
+from .mutations import RegisterUserMutation, AddUserRoleMutation
 from ..role.model import RoleModel
 from core.common.type import Filter, Pagination
 

@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_graphql import GraphQLView
+from flask_cors import CORS
 from flask_mongoengine import MongoEngine
 from flask_jwt_extended import JWTManager
 
@@ -20,6 +21,7 @@ def add_claims_to_access_token(user):
     return {"roles": roles}
 app.debug = True
 db = MongoEngine()
+cors = CORS(app)
 
 if __name__ == '__main__':
     db.init_app(app)
