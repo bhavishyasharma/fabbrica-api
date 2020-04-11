@@ -8,10 +8,11 @@ from database import init_db
 
 app = Flask(__name__)
 app.config['MONGODB_SETTINGS'] = {
-    'db': 'catalyst',
+    'db': 'fabbrica',
     
 }
 app.config['JWT_SECRET_KEY'] = 'super-secret'
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = 86400
 jwt = JWTManager(app)
 @jwt.user_claims_loader
 def add_claims_to_access_token(user):

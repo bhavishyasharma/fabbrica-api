@@ -8,7 +8,7 @@ from flask_jwt_extended import (
     get_jwt_identity
 )
 from role_decorators import admin_required
-from .type import UserType, LoginInput, TokenOutput
+from .type import UserType, LoginInput, TokenOutput, RefreshOutput
 from .model import UserModel
 from .mutations import RegisterUserMutation, AddUserRoleMutation
 from ..role.model import RoleModel
@@ -20,6 +20,7 @@ class Query(graphene.ObjectType):
         pagination=Pagination(required=False), sortings = graphene.List(graphene.String, required=False))
     users_count = graphene.Int(filters=graphene.List(Filter, required=False))
     login = graphene.Field(TokenOutput, login_data = LoginInput(required=True))
+    refresh = graphene.Field(RefreshOutput)
 
     def resolve_login(self, info, login_data=None):
         try:
@@ -35,6 +36,12 @@ class Query(graphene.ObjectType):
                 raise GraphQLError('Invalid username or password')
         except DoesNotExist:
             raise GraphQLError('Invalid username or password')
+
+    @jwt_refresh_token_required
+    def resolve_refresh(self, info):
+        current_user = get_jwt_identity()
+        user = UserModel.objects(username=current_user['username']).get()
+        return RefreshOutput(access_token= create_access_token(identity=user))
 
     @jwt_required
     @admin_required

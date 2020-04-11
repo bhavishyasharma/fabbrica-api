@@ -4,3 +4,4 @@ flask_mongoengine
 bcrypt
 graphene_mongo
 flask-jwt-extended
+flask_cors

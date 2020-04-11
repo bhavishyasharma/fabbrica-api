@@ -27,3 +27,6 @@ class TokenOutput(graphene.ObjectType):
     user = graphene.Field(UserType)
     access_token = graphene.String()
     refresh_token = graphene.String()
+
+class RefreshOutput(graphene.ObjectType):
+    access_token = graphene.String()
