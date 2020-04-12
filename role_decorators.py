@@ -8,9 +8,7 @@ def admin_required(fn):
     def wrapper(*args, **kwargs):
         verify_jwt_in_request()
         claims = get_jwt_claims()
-        print("Hahahaha")
         if 'admin' not in claims['roles']:
-            print("Blaha Blah")
             raise NoAuthorizationError("Permission Denied!")
         else:
             return fn(*args, **kwargs)

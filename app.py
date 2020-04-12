@@ -9,7 +9,9 @@ from database import init_db
 app = Flask(__name__)
 app.config['MONGODB_SETTINGS'] = {
     'db': 'fabbrica',
-    
+    'username': 'apiUser',
+    'password': 'apiPassword',
+    'authentication_source': 'admin'
 }
 app.config['JWT_SECRET_KEY'] = 'super-secret'
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = 86400
