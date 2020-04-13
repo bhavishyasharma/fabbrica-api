@@ -30,6 +30,33 @@ class RegisterUserMutation(graphene.Mutation):
         user.save()
         return RegisterUserMutation(user=user)
 
+class UpdateUserMutation(graphene.Mutation):
+    user = graphene.Field(UserType)
+
+    class Arguments:
+        userId = graphene.String(required=True)
+        username = graphene.String()
+        email = graphene.String()
+        firstname = graphene.String()
+        lastname = graphene.String()
+        roles = graphene.List(graphene.String)
+
+    def mutate(self, info, userId, username=None, email=None, firstname=None, lastname=None, roles=None):
+        user = UserModel.objects(id=userId).get()
+        if username is not None:
+            user.username = username
+        if email is not None:
+            user.email = email
+        if firstname is not None:
+            user.firstname = firstname
+        if lastname is not None:
+            user.lastname = lastname
+        if roles is not None:
+            rolesList = RoleModel.objects(id__in=roles).all()
+            user.roles = rolesList
+        user.save()
+        return UpdateUserMutation(user=user)
+
 class AddUserRoleMutation(graphene.Mutation):
     user = graphene.Field(UserType)
     class Arguments:

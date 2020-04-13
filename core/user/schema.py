@@ -10,7 +10,7 @@ from flask_jwt_extended import (
 from role_decorators import admin_required
 from .type import UserType, LoginInput, TokenOutput, RefreshOutput
 from .model import UserModel
-from .mutations import RegisterUserMutation, AddUserRoleMutation
+from .mutations import RegisterUserMutation, AddUserRoleMutation, UpdateUserMutation
 from ..role.model import RoleModel
 from core.common.type import Filter, Pagination
 
@@ -18,6 +18,7 @@ class Query(graphene.ObjectType):
     node = graphene.relay.Node.Field()
     users = graphene.List(UserType, filters=graphene.List(Filter, required=False), 
         pagination=Pagination(required=False), sortings = graphene.List(graphene.String, required=False))
+    user = graphene.Field(UserType, userId=graphene.String(required=True))
     users_count = graphene.Int(filters=graphene.List(Filter, required=False))
     login = graphene.Field(TokenOutput, login_data = LoginInput(required=True))
     refresh = graphene.Field(RefreshOutput)
@@ -36,6 +37,10 @@ class Query(graphene.ObjectType):
                 raise GraphQLError('Invalid username or password')
         except DoesNotExist:
             raise GraphQLError('Invalid username or password')
+
+    def resolve_user(self, info, userId=None):
+        user = UserModel.objects(id=userId).get()
+        return user
 
     @jwt_refresh_token_required
     def resolve_refresh(self, info):
@@ -76,5 +81,6 @@ class Query(graphene.ObjectType):
 class Mutation(graphene.ObjectType):
     register_user = RegisterUserMutation.Field()
     add_user_role = AddUserRoleMutation.Field()
+    update_user = UpdateUserMutation.Field()
  
 schema = graphene.Schema(query=Query, types=[UserType], mutation=Mutation)
