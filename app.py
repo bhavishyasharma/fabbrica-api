@@ -3,6 +3,7 @@ from flask_graphql import GraphQLView
 from flask_cors import CORS
 from flask_mongoengine import MongoEngine
 from flask_jwt_extended import JWTManager
+from flask_influxdb import InfluxDB
 
 from database import init_db
 
@@ -26,8 +27,16 @@ app.debug = True
 db = MongoEngine()
 cors = CORS(app)
 
+app.config['INFLUXDB_HOST'] = 'localhost'
+app.config['INFLUXDB_PORT'] = '8086'
+# app.config['INFLUXDB_USER'] = 
+# app.config['INFLUXDB_PASSWORD'] = 
+app.config['INFLUXDB_DATABASE'] = 'fabbrica'
+influx_db = InfluxDB()
+
 if __name__ == '__main__':
     db.init_app(app)
+    influx_db.init_app(app=app)
     from schema import schema
     app.add_url_rule(
         '/graphql',
