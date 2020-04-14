@@ -1,5 +1,5 @@
 import mongoengine
-from mongoengine.fields import ( StringField, DecimalField, ReferenceField, IntField )
+from mongoengine.fields import ( StringField, DecimalField, ReferenceField, IntField, BooleanField )
 from fabbrica.company.model import CompanyModel
 
 class MachineModel(mongoengine.Document):
@@ -8,6 +8,7 @@ class MachineModel(mongoengine.Document):
     name = StringField()
     make = StringField()
     model = StringField()
+    isEnabled = BooleanField()
     company = ReferenceField(CompanyModel, reverse_delete_rule=mongoengine.DENY)
     clampingCapacity = IntField()
     injectionVolume = DecimalField()
